@@ -3,5 +3,3 @@
 
 ## Contact
 genhack@polytechnique.fr
-
-@g0bel1n
