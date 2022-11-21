@@ -2,7 +2,7 @@ import os
 import torch
 import numpy as np
 
-def train_epoch(model, optimizer, train_loader, log, epoch, eval_batches=300):
+def train_epoch(model, optimizer, train_loader, log, epoch, device, eval_batches=300):
     total_loss = 0
     total_kl = 0
     total_neg_logpx_z = 0
@@ -11,7 +11,7 @@ def train_epoch(model, optimizer, train_loader, log, epoch, eval_batches=300):
     model.train()
     for x in train_loader:
         optimizer.zero_grad()
-        x = x[0].float().to('cuda')
+        x = x[0].float().to(device)
 
         x_batched = x.view(x.shape[0], -1) 
         z, probs_x, kl_z, neg_logpx_z = model(x_batched)
@@ -37,7 +37,7 @@ def train_epoch(model, optimizer, train_loader, log, epoch, eval_batches=300):
     return total_loss, total_neg_logpx_z, total_kl, num_batches
 
 
-def eval_epoch(model, val_loader, n_is_samples=100):
+def eval_epoch(model, val_loader, device, n_is_samples=100):
     total_loss = 0
     total_kl = 0
     total_neg_logpx_z = 0
@@ -47,7 +47,7 @@ def eval_epoch(model, val_loader, n_is_samples=100):
     model.eval()
     with torch.no_grad():
         for x in val_loader:
-            x = x[0].float().to('cuda')
+            x = x[0].float().to(device)
 
             x_batched = x.view(x.shape[0], -1) 
             z, probs_x, kl_z, neg_logpx_z = model(x_batched)

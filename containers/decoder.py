@@ -30,9 +30,10 @@ class Bernoulli_Decoder(Decoder):
 
 
 class Gaussian_Decoder(Decoder):
-    def __init__(self, model, scale=1.0):
+    def __init__(self, model, scale=1.0, device='cuda'):
         super(Gaussian_Decoder, self).__init__(model)
-        self.scale = torch.tensor([scale], device='cuda')
+        
+        self.scale = torch.tensor([scale], device=device)
 
     def forward(self, z, x):
         mu_x = self.model(z)

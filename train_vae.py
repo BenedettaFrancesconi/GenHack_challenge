@@ -31,11 +31,12 @@ def load_data(data_path='data/df_train.csv',
     return train_loader, val_loader
 
 
-def create_model(config):
+def create_model(config, device):
     z_encoder = Gaussian_Encoder(MLP_Encoder(latent_dim=config['latent_dim'], n_cin=6),
                                  latent_dim=config['latent_dim'],
                                  loc=0.0, scale=1.0)
-    decoder = Gaussian_Decoder(MLP_Decoder(latent_dim=config['latent_dim'], n_cout=6))
+    decoder = Gaussian_Decoder(MLP_Decoder(latent_dim=config['latent_dim'], n_cout=6),
+                                scale=1.0, device=device)
     return VAE(z_encoder, decoder)
 
     
@@ -46,7 +47,7 @@ def log(key, val):
 def main():
     config = {
         'wandb_on': False,
-        'lr': 1e-3,
+        'lr': 1e-4,
         'momentum': 0.9,
         'batch_size': 256,
         'max_epochs': 1000,
@@ -61,13 +62,14 @@ def main():
         }
 
     name = 'Basic_VAE'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     train_loader, val_loader = load_data(data_path=config['data_path'],
                                          n_val_years=config['n_val_years'], 
                                          batch_size=config['batch_size'])
 
-    model = create_model(config)
-    model.to('cuda')
+    model = create_model(config, device)
+    model.to(device)
 
     optimizer = optim.SGD(model.parameters(), 
                            lr=config['lr'],
@@ -79,6 +81,7 @@ def main():
 
         total_loss, total_neg_logpx_z, total_kl, num_batches = train_epoch(model, optimizer, 
                                                                      train_loader, log, e, 
+                                                                     device=device,
                                                                      eval_batches=config['eval_batches'])
 
         log("Epoch Avg Loss", total_loss / num_batches)
@@ -90,6 +93,7 @@ def main():
 
         if e % config['eval_epochs'] == 0:
             total_loss, total_neg_logpx_z, total_kl, total_is_estimate, num_batches = eval_epoch(model, val_loader,
+                                                                                                device=device,
                                                                                                 n_is_samples=config['n_is_samples'])
                                                                                                                 
             log("Val Avg Loss", total_loss / num_batches)
