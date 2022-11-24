@@ -47,7 +47,7 @@ def log(key, val):
 def main():
     config = {
         'wandb_on': False,
-        'lr': 1e-4,
+        'lr': 1e-3,
         'momentum': 0.9,
         'batch_size': 256,
         'max_epochs': 1000,
@@ -57,7 +57,7 @@ def main():
         'seed': 1,
         'n_is_samples': 10,
         'latent_dim': 10,
-        'checkpoint_path': 'checkpoints/vae_checkpoint.tar',
+        'checkpoint_path': 'checkpoints/vae_100e_lr1e-3_val9_d10.tar',
         'data_path': 'data/df_train.csv',
         }
 
@@ -70,6 +70,9 @@ def main():
 
     model = create_model(config, device)
     model.to(device)
+
+    # load_checkpoint_path = config['checkpoint_path']
+    # model.load_state_dict(torch.load(load_checkpoint_path))
 
     optimizer = optim.SGD(model.parameters(), 
                            lr=config['lr'],
