@@ -164,7 +164,7 @@ def load_model():
     model.to(device)
 
     load_checkpoint_path = default_config['checkpoint_path']
-    model.load_state_dict(torch.load(load_checkpoint_path))
+    model.load_state_dict(torch.load(load_checkpoint_path, map_location=torch.device(device)))
 
     return model
 
