@@ -5,8 +5,8 @@ from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import TensorDataset, DataLoader
 
 from diffusion_train_loops import train_epoch_diffusion, eval_epoch_diffusion
-from diffusion import GaussianDiffusion1D
-from architectures.mlp import MLP_Encoder, MLP_Decoder
+from diffusion import GaussianDiffusion1D, Unet1D
+# from architectures.mlp import Diffusion_MLP
 
 def load_data(data_path='data/df_train.csv', 
               n_val_years=9,
@@ -28,16 +28,23 @@ def load_data(data_path='data/df_train.csv',
 
 
 def create_model(config, device):
-    model = MLP_Encoder(latent_dim=config['latent_dim'], n_cin=6)
+    # model = Diffusion_MLP(latent_dim=config['latent_dim'], n_cin=6)
 
-    diffusion = GaussianDiffusion(
+    model = Unet1D(
+                    seq_length = 1,
+                    dim = 32,
+                    dim_mults = (1, 2, 4, 8),
+                    channels = config['input_dim']
+                    )
+
+    diffusion = GaussianDiffusion1D(
         model,
-        image_size = config['input_dim'],
+        seq_length = 1,
         timesteps = config['timesteps'],   
         loss_type = config['loss_type']    
     )
 
-    return diffusionn
+    return diffusion
 
     
 def log(key, val):
@@ -58,7 +65,8 @@ def main():
         'seed': 1,
         'latent_dim': 10,
         'input_dim': 6,
-        'loss_type': 'L1'     # L1 or L2
+        'timesteps': 1000,
+        'loss_type': 'l1',     # L1 or L2
         'checkpoint_path': 'checkpoints/diffusion_100e_lr1e-3_val9_d10.tar',
         'data_path': 'data/df_train.csv',
         }
@@ -85,26 +93,20 @@ def main():
     for e in range(config['max_epochs']):
         log('Epoch', e)
 
-        total_loss, total_neg_logpx_z, total_kl, num_batches = train_epoch_diffusionn(model, optimizer, 
+        total_loss,  num_batches = train_epoch_diffusion(model, optimizer, 
                                                                      train_loader, log, e, 
                                                                      device=device,
                                                                      eval_batches=config['eval_batches'])
 
         log("Epoch Avg Loss", total_loss / num_batches)
-        log("Epoch Avg -LogP(x|z)", total_neg_logpx_z / num_batches)
-        log("Epoch Avg KL", total_kl / num_batches)
         scheduler.step()
         
         torch.save(model.state_dict(), config['checkpoint_path'])
 
         if e % config['eval_epochs'] == 0:
-            total_loss, total_neg_logpx_z, total_kl, total_is_estimate, num_batches = eval_epoch_diffusion(model, val_loader,
-                                                                                                device=device)
+            total_loss, num_batches = eval_epoch_diffusion(model, val_loader, device=device)
                                                                                                                 
             log("Val Avg Loss", total_loss / num_batches)
-            log("Val Avg -LogP(x|z)", total_neg_logpx_z / num_batches)
-            log("Val Avg KL", total_kl / num_batches)
-            log("Val IS Estiamte", total_is_estimate / num_batches)
 
 if __name__ == "__main__":
     main()

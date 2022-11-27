@@ -11,7 +11,7 @@ def train_epoch_diffusion(model, optimizer, train_loader, log, epoch, device, ev
         optimizer.zero_grad()
         x = x[0].float().to(device)
 
-        x_batched = x.view(x.shape[0], -1) 
+        x_batched = x.view(x.shape[0], -1, 1) # (batch_size, n_channels, seq_length)
         loss = model(x_batched)
         loss.backward()
 
@@ -37,7 +37,7 @@ def eval_epoch_diffusion(model, val_loader, device):
         for x in val_loader:
             x = x[0].float().to(device)
 
-            x_batched = x.view(x.shape[0], -1) 
+            x_batched = x.view(x.shape[0], -1, 1) 
             loss = model(x_batched)
             total_loss += loss
             num_batches += 1
