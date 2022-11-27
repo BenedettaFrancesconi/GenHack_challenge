@@ -8,16 +8,14 @@ import torch
 import numpy as np
 import logging
 
-df = pd.read_csv('../data/df_train.csv')
-train = torch.tensor(df.iloc[:int(-365*n_val_years), 1:].to_numpy())
-val = torch.tensor(df.iloc[int(-365*n_val_years):, 1:].to_numpy())
+#df = pd.read_csv('C:/Users/bened/Documents/GitHub/TEAM_ROCKET/datadf_train.csv')
 
 
 logging.basicConfig(filename="check.log", level=logging.DEBUG, 
                     format="%(asctime)s:%(levelname)s: %(message)s", 
                     filemode='w')
 
-def simulate(noise, val):
+def simulate(noise, df):
     """
     simulation of your Generative Model
 
@@ -28,6 +26,8 @@ def simulate(noise, val):
     noise : ndarray
         input of the generative model
     """
+    train = np.array(df.iloc[:int(-365*n_val_years), 1:])
+    val = np.array(df.iloc[int(-365*n_val_years):, 1:])
 
     try:
         output = generative_model(noise)
@@ -51,6 +51,7 @@ def simulate(noise, val):
 if __name__ == "__main__":
     z = np.random.normal(0,1, size = (10,50))
     noise = z
-    simulate(noise,val)
+    df = np.load("data/train_val.csv")
+    simulate(noise,df)
     
     
