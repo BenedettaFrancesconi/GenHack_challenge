@@ -17,7 +17,7 @@ logging.basicConfig(filename="check.log", level=logging.DEBUG,
                     format="%(asctime)s:%(levelname)s: %(message)s", 
                     filemode='w')
 
-def simulate(noise):
+def simulate(noise, val):
     """
     simulation of your Generative Model
 
@@ -51,6 +51,6 @@ def simulate(noise):
 if __name__ == "__main__":
     z = np.random.normal(0,1, size = (10,50))
     noise = z
-    simulate(noise)
+    simulate(noise,val)
     
     
