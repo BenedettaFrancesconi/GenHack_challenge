@@ -40,7 +40,8 @@ def simulate(noise):
 
     
 if __name__ == "__main__":
-    noise = np.load("data/noise.npy")
+    z = np.random.normal(0,1, size = (10,50))
+    noise = z
     simulate(noise)
     
     
