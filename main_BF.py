@@ -26,8 +26,8 @@ def simulate(noise, df):
     noise : ndarray
         input of the generative model
     """
-    train = np.array(df.iloc[:int(-365*n_val_years), 1:])
-    val = np.array(df.iloc[int(-365*n_val_years):, 1:])
+    train = np.array(df.iloc[:int(-365*9), 1:])
+    val = np.array(df.iloc[int(-365*9):, 1:])
 
     try:
         output = generative_model(noise)
@@ -51,7 +51,7 @@ def simulate(noise, df):
 if __name__ == "__main__":
     z = np.random.normal(0,1, size = (10,50))
     noise = z
-    df = np.load("data/train_val.csv")
+    df = np.load("data/df_train.csv")
     simulate(noise,df)
     
     
