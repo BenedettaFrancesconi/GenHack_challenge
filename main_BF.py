@@ -26,17 +26,18 @@ def simulate(noise, df):
     noise : ndarray
         input of the generative model
     """
-    train = np.array(df.iloc[:int(-365*9), 1:])
-    val = np.array(df.iloc[int(-365*9):, 1:]).transpose().astype('float32')
-
+    
     try:
-        output = generative_model(noise)
-        message = "Successful simulation" 
-        assert output.shape == (noise.shape[0], 6).transpose().astype('float32'), "Shape error, it must be (n_data, 6). Please verify the shape of the output."
+        train = np.array(df.iloc[:int(-365*9), 1:])
+        val = np.array(df.iloc[int(-365*9):, 1:]).transpose().astype('float32')
+        output = np.array(generative_model(noise))
+        #message = "Successful simulation" 
+        #assert output.shape == (noise.shape[0], 6).transpose().astype('float32'), "Shape error, it must be (n_data, 6). Please verify the shape of the output."
         
         # write the output
-        np.save("output.npy", output)
-        AD_distance(val, output)
+        #np.save("output.npy", output)
+        w = []
+        w = AD_distance(val, output)
 
     except Exception as e:
         message = e
@@ -44,7 +45,7 @@ def simulate(noise, df):
     finally:
         logging.debug(message)
 
-    return output
+    return w
 
 
     
