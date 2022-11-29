@@ -4,7 +4,7 @@
 from model import generative_model
 from utils import AD_distance
 import pandas as pd
-#import torch
+import torch
 import numpy as np
 import logging
 
@@ -30,6 +30,7 @@ def simulate(noise, df):
     try:
         train = np.array(df.iloc[:int(-365*9), 1:])
         val = np.array(df.iloc[int(-365*9):, 1:]).transpose().astype('float32')
+        noise = torch.tensor(noise).float()
         output = np.array(generative_model(noise))
         #message = "Successful simulation" 
         #assert output.shape == (noise.shape[0], 6).transpose().astype('float32'), "Shape error, it must be (n_data, 6). Please verify the shape of the output."
