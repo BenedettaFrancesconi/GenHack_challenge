@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import torch
 from torch import optim
@@ -52,6 +53,7 @@ def main():
         'batch_size': 256,
         'max_epochs': 1000,
         'eval_epochs': 5,
+        'AD_epochs': 500,
         'eval_batches': 100,
         'n_val_years': 9,
         'seed': 1,
@@ -98,11 +100,30 @@ def main():
             total_loss, total_neg_logpx_z, total_kl, total_is_estimate, num_batches = eval_epoch(model, val_loader,
                                                                                                 device=device,
                                                                                                 n_is_samples=config['n_is_samples'])
-                                                                                                                
+
             log("Val Avg Loss", total_loss / num_batches)
             log("Val Avg -LogP(x|z)", total_neg_logpx_z / num_batches)
             log("Val Avg KL", total_kl / num_batches)
             log("Val IS Estiamte", total_is_estimate / num_batches)
+
+
+        if (e + 1) % config['AD_epochs'] == 0 or (e + 1) == config['max_epochs']:
+            # Computing AD Metric
+            val_data = val_loader.dataset.tensors[0] # (n_test, 6)
+            noise = np.random.normal(0,1, size = (val_data.shape[0], config['latent_dim']))
+            noise = torch.tensor(noise).float()
+            sample = model.decoder.only_decode(noise)
+            sample = sample.detach().cpu().numpy().astype('float32') # (n_test, 6)
+
+            ## TODO: Add output of ARIMA to sample here
+            # sample = sample + (ARIMA(2006) - mean(ARIMA(1981 to 2002)))
+
+            w = AD_distance(sample.transpose(), val_data.cpu().numpy().astype('float32').transpose())
+    
+            print("AD Distance per Station:", w)
+            print("AD Distance Mean:", w.mean())
+
+
 
 if __name__ == "__main__":
     main()
