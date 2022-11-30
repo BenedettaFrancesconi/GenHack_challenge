@@ -21,7 +21,7 @@ def SARIMA(lit,df):
   p = range(0, 2)
   pdq = list(itertools.product(p, d, q))
   # Generate all different combinations of seasonal p, q and q triplets
-  seasonal_pdq = [(x[0], x[1], x[2], 365) for x in list(itertools.product(p, d, q))]
+  seasonal_pdq = [(x[0], x[1], x[2], 12) for x in list(itertools.product(p, d, q))]
   for name, value in lit.items():
     X = df[name]
     size = int(len(X) * 0.66)
