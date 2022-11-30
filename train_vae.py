@@ -92,7 +92,7 @@ def main():
         log("Epoch Avg KL", total_kl / num_batches)
         scheduler.step()
         
-        torch.save(model.state_dict(), config['checkpoint_path'])
+        #torch.save(model.state_dict(), config['checkpoint_path'])
 
         if e % config['eval_epochs'] == 0:
             total_loss, total_neg_logpx_z, total_kl, total_is_estimate, num_batches = eval_epoch(model, val_loader,
