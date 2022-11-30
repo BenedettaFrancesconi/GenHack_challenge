@@ -1,12 +1,8 @@
 import numpy as np
 import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA
-#from sklearn.metrics import mean_squared_error
-#from math import sqrt
-#from tqdm import tqdm
 import warnings
 import itertools
-#import matplotlib.pyplot as plt
 import statsmodels.api as sm
 
 # Defaults
@@ -15,13 +11,14 @@ import statsmodels.api as sm
 #plt.style.use('ggplot')
 
 def SARIMA(lit,df):
-
   q = d = range(0, 2)
 # Define the p parameters to take any value between 0 and 3
   p = range(0, 2)
   pdq = list(itertools.product(p, d, q))
   # Generate all different combinations of seasonal p, q and q triplets
   seasonal_pdq = [(x[0], x[1], x[2], 12) for x in list(itertools.product(p, d, q))]
+  list_autofit = []
+  dict_autofit = []
   for name, value in lit.items():
     X = df[name]
     size = int(len(X) * 0.66)
@@ -34,7 +31,7 @@ def SARIMA(lit,df):
     SARIMAX_model = []
     for param in pdq:
       for param_seasonal in seasonal_pdq:
-        try:
+        #try:
           mod = sm.tsa.statespace.SARIMAX(train, order=param, 
                                           seasonal_order=param_seasonal, 
                                           enforce_stationarity=False,
@@ -43,10 +40,13 @@ def SARIMA(lit,df):
           print('SARIMAX{}x{} - AIC:{}'.format(param, param_seasonal, results.aic), end='\r')
           AIC.append(results.aic)
           SARIMAX_model.append([param, param_seasonal])
-        except:
-            continue
-    print('The smallest AIC is {} for model SARIMAX{}x{}'.format(min(AIC), SARIMAX_model[AIC.index(min(AIC))][0],SARIMAX_model[AIC.index(min(AIC))][1]))
-
+          #print(name)
+          list_autofit.append([name, min(AIC), SARIMAX_model[AIC.index(min(AIC))][0], SARIMAX_model[AIC.index(min(AIC))][1]])
+          #dict_autofit[name] = pd.DataFrame(list_autofit, columns = ["station", "AIC", "order_lags", "seasonal_lags"])
+        #except:
+         #   continue
+    #print('The smallest AIC is {} for model SARIMAX{}x{}'.format(min(AIC), SARIMAX_model[AIC.index(min(AIC))][0],SARIMAX_model[AIC.index(min(AIC))][1]))
+    print(list_autofit)
 
 if __name__ == "__main__":
     df = pd.read_csv("data/df_train.csv")
