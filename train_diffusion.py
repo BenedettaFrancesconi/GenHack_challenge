@@ -67,7 +67,7 @@ def main():
         'eval_batches': 100,
         'n_val_years': 9,
         'seed': 1,
-        'latent_dim': 10,
+        'latent_dim': 32, # must be multiple of 8
         'input_dim': 6,
         'timesteps': 1000,
         'loss_type': 'l1',     # L1 or L2
