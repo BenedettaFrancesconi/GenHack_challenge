@@ -101,7 +101,7 @@ def main():
         log("Epoch Avg Loss", total_loss / num_batches)
         scheduler.step()
         
-        torch.save(model.state_dict(), config['checkpoint_path'])
+        #torch.save(model.state_dict(), config['checkpoint_path'])
 
         if e % config['eval_epochs'] == 0:
             total_loss, num_batches = eval_epoch_diffusion(model, val_loader, device=device)
