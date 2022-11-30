@@ -12,7 +12,7 @@ logging.basicConfig(filename="check_BF.log", level=logging.DEBUG,
                     format="%(asctime)s:%(levelname)s: %(message)s", 
                     filemode='w')
 
-def simulate(df, noise):
+def simulate(df):
     """
     simulation of your Generative Model
 
@@ -20,37 +20,35 @@ def simulate(df, noise):
     ----------
     model : object
         generator function
-    noise : ndarray
-        input of the generative model
     """
-    
-
     #train = np.array(df.iloc[:int(-365*9), 1:])
     val = np.array(df.iloc[int(-365*9):, 1:]).transpose().astype('float32')
     #noise = torch.tensor(noise).float()
+
+    z = np.random.normal(0,1, size = (val.shape[1],50))
+    noise = torch.tensor(z).float()
+
     output = np.array(generative_model(noise)).transpose().astype('float32')
     #message = "Successful simulation" 
     #assert output.shape == (noise.shape[0], 6).transpose().astype('float32'), "Shape error, it must be (n_data, 6). Please verify the shape of the output."
         
-    
-    w = []
     """
     AD_distance:
     real: np.array(6, n_test)
     fake: np.array(6, n_test)
     """
-    
 
     w = AD_distance(output, val)
     
+    print("AD Distance per Station:", w)
+    print("AD Distance Mean:", w.mean())
+
     return w
 
 
     
 if __name__ == "__main__":
-    z = np.random.normal(0,1, size = (10,50))
-    noise = torch.tensor(z).float()
     df = pd.read_csv("data/df_train.csv")
-    simulate(df, noise)
+    simulate(df)
     
     
