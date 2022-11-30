@@ -180,7 +180,7 @@ def generative_model(noise):
     """
     # See below an example
     # ---------------------
-    latent_variable = torch.tensor(noise[:, :default_config['latent_dim']]).to(device)  # use the first 10 dimensions of the noise
+    latent_variable = torch.tensor(noise[:, :default_config['latent_dim']]).float().to(device)  # use the first 10 dimensions of the noise
 
     model = load_model()
 
