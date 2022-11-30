@@ -1,8 +1,10 @@
+import numpy as np
 import pandas as pd
 import torch
 from torch import optim
 from torch.optim.lr_scheduler import StepLR  
 from torch.utils.data import TensorDataset, DataLoader
+from utils import AD_distance
 
 from diffusion_train_loops import train_epoch_diffusion, eval_epoch_diffusion
 from diffusion import GaussianDiffusion1D, Unet1D
@@ -32,7 +34,7 @@ def create_model(config, device):
 
     model = Unet1D(
                     seq_length = 1,
-                    dim = 32,
+                    dim = config['latent_dim'],
                     dim_mults = (1, 2, 4, 8),
                     channels = config['input_dim']
                     )
@@ -59,6 +61,8 @@ def main():
         'momentum': 0.9,
         'batch_size': 256,
         'max_epochs': 1000,
+        'AD_epochs': 100,
+        'n_AD_years': 9,
         'eval_epochs': 5,
         'eval_batches': 100,
         'n_val_years': 9,
@@ -67,7 +71,7 @@ def main():
         'input_dim': 6,
         'timesteps': 1000,
         'loss_type': 'l1',     # L1 or L2
-        'checkpoint_path': 'checkpoints/diffusion_100e_lr1e-3_val9_d10.tar',
+        'checkpoint_path': 'checkpoints/diffusion_1000e_lr1e-3_val9_d10.tar',
         'data_path': 'data/df_train.csv',
         }
 
@@ -107,6 +111,26 @@ def main():
             total_loss, num_batches = eval_epoch_diffusion(model, val_loader, device=device)
                                                                                                                 
             log("Val Avg Loss", total_loss / num_batches)
+
+
+        if (e + 1) % config['AD_epochs'] == 0 or (e + 1) == config['max_epochs']:
+            # Computing AD Metric
+            val_data = val_loader.dataset.tensors[0][:config['n_AD_years']*365] # (n_test, 6)
+            noise = np.random.normal(0,1, size = (val_data.shape[0], config['latent_dim']))
+            noise = torch.tensor(noise).float()
+            sample = model.sample(noise.shape[0])
+
+            sample = sample.squeeze().detach().cpu().numpy().astype('float32') # (n_test, 6)
+
+            ## TODO: Add output of ARIMA to sample here
+            # sample = sample + (ARIMA(2006) - mean(ARIMA(1981 to 2002)))
+
+            w = AD_distance(sample.reshape(-1, 6).transpose(), val_data.cpu().numpy().astype('float32').transpose())
+    
+            print("AD Distance per Station:", w)
+            print("AD Distance Mean:", w.mean())
+
+
 
 if __name__ == "__main__":
     main()

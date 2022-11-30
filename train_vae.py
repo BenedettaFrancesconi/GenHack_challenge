@@ -107,7 +107,7 @@ def main():
             log("Val IS Estiamte", total_is_estimate / num_batches)
 
 
-        if (e + 1) % config['AD_epochs'] == 0:
+        if (e + 1) % config['AD_epochs'] == 0 or (e + 1) == config['max_epochs']:
             # Computing AD Metric
             val_data = val_loader.dataset.tensors[0] # (n_test, 6)
             noise = np.random.normal(0,1, size = (val_data.shape[0], config['latent_dim']))
