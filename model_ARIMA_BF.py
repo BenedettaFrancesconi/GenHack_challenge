@@ -7,12 +7,17 @@ from tqdm import tqdm
 
 
 def ARIMA(df, ar, ma):
-    i = ['s1', 's2', 's3', 's4', 's5', 's6']
+    i = {'s1': s1,
+    's2': s2,
+    's3': s3,
+    's4': s4,
+    's5': s5,
+    's6': s6}
     dict_autofit = {}
-    for i in(li):
+    for name, value in li.items():
         for ar_lag in range(ar):
             for ma_lag in range(ma):  
-                X = df[i]
+                X = df[value]
                 size = int(len(X) * 0.66)
                 train, test = X[0:size], X[size:len(X)]
                 history = [x for x in train]
